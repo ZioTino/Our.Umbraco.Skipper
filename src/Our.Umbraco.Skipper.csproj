@@ -17,11 +17,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="App_Plugins\Our.Umbraco.Skipper\**\*.*">
+        <Content Include="src\App_Plugins\Our.Umbraco.Skipper\**\*.*">
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
             <CopyToPublishDirectory>Always</CopyToPublishDirectory>
         </Content>
-        <None Include="build\**\*.*">
+        <None Include="src\build\**\*.*">
             <Pack>True</Pack>
             <PackagePath>buildTransitive</PackagePath>
         </None>
