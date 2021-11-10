@@ -47,7 +47,7 @@ namespace Our.Umbraco.Skipper
                     // I can return an empty UrlInfo
                     // And since i cannot simply return new UrlInfo(string.Empty, false, culture);
                     // I have to use a placeholder
-                    return new UrlInfo("#", false, culture);   
+                    return new UrlInfo(Constants.DefaultValues.HiddenSegment, false, culture);   
                 }
 
                 // I can return null as it should return normal URL.
