@@ -1,12 +1,13 @@
+using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Linq;
-using Lucene.Net.Analysis.Hunspell;
-using Our.Umbraco.Skipper.Extensions;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.Routing;
 using Umbraco.Cms.Core.Web;
 using Umbraco.Extensions;
+using Our.Umbraco.Skipper.Extensions;
+using Our.Umbraco.Skipper.Configuration;
 
 namespace Our.Umbraco.Skipper
 {
@@ -15,19 +16,24 @@ namespace Our.Umbraco.Skipper
         private readonly IAppPolicyCache _runtimeCache;
 
         private readonly IUmbracoContextAccessor _umbracoContextAccessor;
+
+        private readonly IConfiguration _configuration;
         
         public SkipperContentFinder(
             IAppPolicyCache runtimeCache,
-            IUmbracoContextAccessor umbracoContextAccessor)
+            IUmbracoContextAccessor umbracoContextAccessor,
+            IConfiguration configuration)
         {
             _runtimeCache = runtimeCache;
             _umbracoContextAccessor = umbracoContextAccessor;
+            _configuration = configuration;
         }
         public bool TryFindContent(IPublishedRequestBuilder request)
         {
+            // Getting the IUmbracoContext
             IUmbracoContext umbracoContext = _umbracoContextAccessor.GetRequiredUmbracoContext();
 
-            var cache = _runtimeCache.GetCacheItem<Dictionary<string, int>>("cachedSkipperWork");
+            var cache = _runtimeCache.GetCacheItem<Dictionary<string, int>>(Constants.Cache.Key);
             
             string path = request.Uri.AbsoluteUri;
             if (path.IndexOf('?') != -1)
@@ -35,7 +41,7 @@ namespace Our.Umbraco.Skipper
                 path = path.Substring(0, path.IndexOf('?'));
             }
             
-            if (cache != null && cache.ContainsKey("path"))
+            if (cache != null && cache.ContainsKey(path))
             {
                 int nodeId = cache[path];
                 request.SetPublishedContent(umbracoContext.Content.GetById(nodeId));
@@ -43,8 +49,9 @@ namespace Our.Umbraco.Skipper
             }
 
             string culture = request.Culture;
-
             var rootNodes = umbracoContext.Content.GetAtRoot(culture: culture);
+            
+            // We have to check both paths, with and without ending slash
             IPublishedContent item = null;
             item = rootNodes
                     .DescendantsOrSelf<IPublishedContent>(culture: culture)
@@ -52,10 +59,12 @@ namespace Our.Umbraco.Skipper
 
             if (item != null)
             {
-                if (item.SkipperWasHere())
+                // If skipper was here
+                // And the configuration says that skipper's work must return 404
+                if (item.SkipperWasHere() && SkipperConfiguration.SkipperWorkReturns404)
                 {
                     request.SetIs404();
-                    return true;
+                    return true; // We have to return true in order to stop the contentfinder
                 }
 
                 if (cache == null)
@@ -68,8 +77,9 @@ namespace Our.Umbraco.Skipper
                     cache.Add(path, item.Id);
                 }
 
+                // Inserting skipper's current work into Umbraco's cache
                 _runtimeCache.InsertCacheItem<Dictionary<string, int>>(
-                    "cachedSkipperWork",
+                    Constants.Cache.Key,
                     () => cache,
                     null,
                     false);

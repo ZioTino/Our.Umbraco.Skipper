@@ -3,16 +3,17 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Our.Umbraco.Skipper.Extensions;
 using Umbraco.Cms.Core.Configuration.Models;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.Routing;
 using Umbraco.Cms.Core.Web;
 using Umbraco.Extensions;
+using Our.Umbraco.Skipper.Configuration;
+using Our.Umbraco.Skipper.Extensions;
 
 namespace Our.Umbraco.Skipper
 {
-    public class SkipperUrlProvider : DefaultUrlProvider, IUrlProvider
+    public class SkipperUrlProvider : DefaultUrlProvider
     {
         private readonly IConfiguration _configuration;
 
@@ -38,9 +39,20 @@ namespace Our.Umbraco.Skipper
                 return base.GetUrl(content, mode, culture, current);
             }
 
-            // If Skipper worked directly into this node, I can return null as it should return normal URL.
+            // If Skipper worked directly into this node
             if (content.SkipperWasHere())
+            {
+                if (SkipperConfiguration.SkipperWorkReturns404)
+                {
+                    // I can return an empty UrlInfo
+                    // And since i cannot simply return new UrlInfo(string.Empty, false, culture);
+                    // I have to use a placeholder
+                    return new UrlInfo("#", false, culture);   
+                }
+
+                // I can return null as it should return normal URL.
                 return null;
+            }
 
             bool skipperWasInAncestor = false;
             foreach (IPublishedContent item in content.Ancestors())
