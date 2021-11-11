@@ -25,5 +25,30 @@ namespace Our.Umbraco.Skipper.Extensions
             
             return false;   
         }
+
+        public static bool SkipperWasHere(this IPublishedContent content, bool recursive = false)
+        {
+            bool result = content.SkipperWasHere();
+
+            // If there is no recursion?
+            // And if the result is false
+            // We can return the result, as there is no recursion.
+            if (!recursive && !result)
+            {
+                return result;
+            }
+
+            // Goes back to parents until it finds another Skipper's work
+            while (content.Parent != null && content.Parent.Id != 0)
+            {
+                content = content.Parent;
+                if (content.SkipperWasHere())
+                {
+                    return true;
+                }
+            }
+
+            return result;
+        }
     }
 }

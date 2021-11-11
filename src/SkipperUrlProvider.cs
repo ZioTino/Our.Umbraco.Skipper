@@ -34,6 +34,7 @@ namespace Our.Umbraco.Skipper
 
         public override UrlInfo GetUrl(IPublishedContent content, UrlMode mode, string culture, Uri current)
         {
+            // Just in case the content is null, we return to the DefaultUrlProvider
             if (content == null)
             {
                 return base.GetUrl(content, mode, culture, current);
@@ -50,12 +51,18 @@ namespace Our.Umbraco.Skipper
                     return new UrlInfo(Constants.DefaultValues.HiddenSegment, false, culture);   
                 }
 
-                // I can return null as it should return normal URL.
-                return null;
+                // As there might be a multi-level Skipper work, we need to check it here.
+                // If there are no other nodes in the path that Skipper worked into
+                if (!content.Parent.SkipperWasHere(recursive: true))
+                {                    
+                    // I can return null as it should return normal URL.
+                    return null;
+                }
             }
 
+            // We still need to handle self for Url building
             bool skipperWasInAncestor = false;
-            foreach (IPublishedContent item in content.Ancestors())
+            foreach (IPublishedContent item in content.AncestorsOrSelf())
             {
                 if (item.SkipperWasHere())
                 {
@@ -68,15 +75,20 @@ namespace Our.Umbraco.Skipper
 
         private UrlInfo BuildUrl(IPublishedContent content, Uri current, UrlMode mode, string culture)
         {
-            IUmbracoContext umbracoContext = _umbracoContextAccessor.GetRequiredUmbracoContext();
+            if (!_umbracoContextAccessor.TryGetUmbracoContext(out IUmbracoContext umbracoContext))
+            {
+                throw new ArgumentNullException("UmbracoContext");
+            }
 
             bool hideTopLevelNode = _configuration.GetValue<bool>("Umbraco:CMS:Global:HideTopLevelNodeFromPath", false);
             string[] pathIds = content.Path.Split(',').Skip(hideTopLevelNode ? 2 : 1).Reverse().ToArray();
 
+            // Starting from the base Url generated from DefaultUrlProvider
             UrlInfo url = base.GetUrl(content, mode, culture, current);
             if (url is null)
-                throw new ArgumentNullException($"Could not call base GetUrl for content Id {content.Id}.");
+                throw new ArgumentNullException($"Base GetUrl for Id {content.Id}.");
 
+            // Parsing the host
             string result = string.Empty;
             string host = string.Empty;
             if (url.Text.StartsWith("http"))
@@ -90,6 +102,7 @@ namespace Our.Umbraco.Skipper
                 result = url.Text;
             }
 
+            // Handling start/end slashes
             if (result.EndsWith("/"))
             {
                 result = result.Substring(0, result.Length - 1);
@@ -106,14 +119,17 @@ namespace Our.Umbraco.Skipper
             {
                 IPublishedContent item = umbracoContext.Content.GetById(int.Parse(pathIds[index]));
 
-                if (item.SkipperWasHere())
+                // If the part we are looking is Skipper's work, and Id is NOT the content Id of the content we are building the Url for 
+                // (or configuration says we should return 404)
+                if (item.SkipperWasHere() && (item.Id != content.Id || SkipperConfiguration.SkipperWorkReturns404))
                 {
                     parts[index] = string.Empty;
                 }
                 index++;
             }
+
             bool isTrailingSlashActive = _configuration.GetValue<bool>("Umbraco:CMS:RequestHandler:AddTrailingSlash", true);
-            string finalUrl = string.Join("/", parts.Reverse().Where(x => !string.IsNullOrWhiteSpace(x)).ToArray());
+            string finalUrl = string.Join("/", parts.Reverse().Where(x => !string.IsNullOrEmpty(x)).ToArray());
 
             finalUrl = isTrailingSlashActive
                 ? finalUrl.EnsureEndsWith("/").EnsureStartsWith("/")
