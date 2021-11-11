@@ -92,8 +92,9 @@ namespace Our.Umbraco.Skipper.Notifications
         {
             newDuplicateNodes = duplicateNodes;
 
-            string childrenName = content.Name.ToLower();
-            string nodeName = node.Name.ToLower();
+            // We have to trim end the name as it may contain spaces (see comment at #64)
+            string childrenName = content.Name.ToLower().TrimEnd();
+            string nodeName = node.Name.ToLower().TrimEnd();
 
             // We need only other nodes
             if (content.Id == node.Id) { return maxNumber; }
