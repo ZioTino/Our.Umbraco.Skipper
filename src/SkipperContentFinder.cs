@@ -55,7 +55,7 @@ namespace Our.Umbraco.Skipper
             IPublishedContent item = null;
             item = rootNodes
                     .DescendantsOrSelf<IPublishedContent>(culture: culture)
-                    .FirstOrDefault(x => x.Url(culture: culture, mode: UrlMode.Absolute) == (path + "/") || x.Url(culture: culture, mode: UrlMode.Absolute) == path);
+                    .FirstOrDefault(x => x.Url(culture: culture, mode: UrlMode.Absolute).TrimEnd("/") == path.TrimEnd("/"));
 
             if (item != null)
             {
