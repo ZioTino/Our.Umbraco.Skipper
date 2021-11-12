@@ -14,6 +14,8 @@ namespace Our.Umbraco.Skipper.Configuration
             public const string HideSkipperWork = "HideSkipperWork";
 
             public const string Aliases = "Aliases";
+
+            public const string WhileLoopMaxCount = "WhileLoopMaxCount";
         }
 
         public class DefaultValues
@@ -25,6 +27,8 @@ namespace Our.Umbraco.Skipper.Configuration
             public static readonly string[] DefaultAliases = new string[] {};
 
             public const string HiddenSegment = "#";
+
+            public const int WhileLoopMaxCount = 50;
         }
         
         public class Cache

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
+using Our.Umbraco.Skipper.Configuration;
 using Our.Umbraco.Skipper.Extensions;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
@@ -72,69 +73,8 @@ namespace Our.Umbraco.Skipper.Notifications
                         baseNode.Parent.SkipperWasHere(out baseNode, true);
 
                         count++;
-                        if (count >= 50) { break; }
+                        if (count >= SkipperConfiguration.WhileLoopMaxCount) { break; }
                     }
-                    // if (baseNode.SkipperWasHere())
-                    // {
-                    //     baseNode.SkipperWasHere(out baseNode, true);
-
-                    //     // baseNode should instead be it's parent, if it's NOT Skipper's work.
-                    //     if (baseNode != null && baseNode.Parent != null && baseNode.Parent.Id != 0)
-                    //     {
-                    //         baseNode = baseNode.Parent;
-                    //     }
-                    // }
-
-
-                    /////////////////////////////////////////////
-                    // if (node.Id == 0) 
-                    // {
-                    //     // Content is being saved for the first time, so it has still no Id
-                    //     // so we set its parent id as the baseNode
-                    //     baseNode = umbracoContext.Content.GetById(node.ParentId);
-                    // }
-                    // else
-                    // {
-                    //     baseNode = umbracoContext.Content.GetById(node.Id);
-                    // }
-
-                    // If parent is a virtual node, we must start to check for duplicates from the parent node of the parent
-                    // We need this as if we save a content that's at level 2, and at level 2 we have another node that is treated by Skipper,
-                    // and inside that node we have a duplicate of the node we are saving, we can't continue
-                    // if (baseNode != null && baseNode.Parent != null && baseNode.Parent.Id != 0)
-                    // {
-                    //     // Best practice to prevent infinite loops
-                    //     int count = 0;
-                        
-                    //     // With this do/while we search for the closest node eligible for being our rootNode
-                    //     // This means we are searching for a node that is Skipper's work
-                    //     IPublishedContent parent;
-                    //     do
-                    //     {
-                    //         if (!baseNode.SkipperWasHere()) { break; }
-
-                    //         parent = umbracoContext.Content.GetById(baseNode.Parent.Id);
-                    //         if (parent != null)
-                    //         {
-                    //             baseNode = parent;
-
-                    //             // If baseNode's parent is not Skipper's work, it means that we have found the node we are looking for
-
-                    //             // LEGGIMI //
-                    //             // Questo è sbagliato. Stando alla struttura corrente dell'ambiente di test, creando una pagina
-                    //             // sotto "SubSubpage", chiamata "And this too":
-                    //             // - Il baseNode dovrebbe essere "Not a skip url"
-                    //             // - Invece il baseNode va avanti fino a "About Us" (che si è uno skipurl, ma troppo avanti)
-                    //             if (!baseNode.Parent.SkipperWasHere()) { break; }
-                    //         }
-
-                    //         // Best practice to prevent infinite loops
-                    //         // My guess is that there will never be an Umbraco instance with more than 50 levels of content 
-                    //         count++;
-                    //         if (count >= 50) { break; }
-                    //     }
-                    //     while (parent != null && parent.Parent != null && parent.Parent.Id != 0);
-                    // }
                 }
                 catch { continue; }
 
@@ -199,18 +139,15 @@ namespace Our.Umbraco.Skipper.Notifications
                     // Node is invariant
                     nodeName = node.Name.ToLower().TrimEnd();
 
-                    Console.WriteLine($"Checking if content {childrenName} ({content.Id}) is duplicate of {nodeName} ({node.Id})");
                     // We found a duplicate!
                     if (nodeName.Equals(childrenName))
                     {
                         _duplicateNodes++;
-                        Console.WriteLine($"Found duplicate with Equals! Duplicate nodes: {_duplicateNodes}");
                     }
                     else if (nodeName.IsSkipperDuplicateOf(childrenName))
                     {
                         _duplicateNodes++;
                         _maxNumber = GetNodeNameMaxNumber(childrenName, nodeName, maxNumber);
-                        Console.WriteLine($"Found duplicate with IsSkipperDuplicateOf! Duplicate nodes: {_duplicateNodes}. Max number: {_maxNumber}.");
                     }
 
                     if (content.SkipperWasHere())
@@ -230,18 +167,15 @@ namespace Our.Umbraco.Skipper.Notifications
 
                         nodeName = node.GetCultureName(culture.Culture).ToLower().TrimEnd();
 
-                        Console.WriteLine($"Checking if content {childrenName} ({content.Id}) is duplicate of {nodeName} ({node.Id})");
                         // We found a duplicate!
                         if (nodeName.Equals(childrenName))
                         {
                             _duplicateNodes++;
-                            Console.WriteLine($"Found duplicate with Equals! Duplicate nodes: {_duplicateNodes}");
                         }
                         else if (nodeName.IsSkipperDuplicateOf(childrenName))
                         {
                             _duplicateNodes++;
                             _maxNumber = GetNodeNameMaxNumber(childrenName, nodeName, maxNumber);
-                            Console.WriteLine($"Found duplicate with IsSkipperDuplicateOf! Duplicate nodes: {_duplicateNodes}. Max number: {_maxNumber}.");
                         }
 
                         if (content.SkipperWasHere())

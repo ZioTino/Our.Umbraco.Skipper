@@ -40,6 +40,8 @@ namespace Our.Umbraco.Skipper.Extensions
                 return true;
             }
 
+            // Some best practice to avoid infinite loops
+            int count = 0;
             // Goes back to parents until it finds another Skipper's work
             while (content.Parent != null && content.Parent.Id != 0)
             {
@@ -49,6 +51,9 @@ namespace Our.Umbraco.Skipper.Extensions
                     _content = content;
                     return true;
                 }
+
+                count++;
+                if (count >= SkipperConfiguration.WhileLoopMaxCount) { break; }
             }
 
             _content = content;
