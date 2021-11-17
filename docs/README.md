@@ -1,4 +1,4 @@
-# ![Skipper](/assets/icon-sm.png?raw=true) Our.Umbraco.Skipper
+# Our.Umbraco.Skipper
 An Umbraco package that lets you specify nodes and document types that will be excluded from Umbraco's URL generation.
 
 This project is exclusively for Umbraco 9+. This project is a port for v9, taken from the [original Umbraco-VirtualNodes](https://github.com/sotirisf/Umbraco-VirtualNodes) by [sotirisf](https://github.com/sotirisf).
