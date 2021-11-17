@@ -10,6 +10,59 @@ dotnet build
 dotnet run
 ```
 
+## Multiple skip support
+Our.Umbraco.Skipper can work no problem with multiple nodes to be skipped, both one following another or not.  
+Some examples (between parentheses the URL segment):
+```
+root (en)
+    products (products)
+        category (category) <-- this is Skipper's work
+            product1 (product1)
+            product2 (product2)
+            product3 (product3)
+```
+Product URLs will be for example `/en/products/product1`.  
+Skipper's work URLs **without** [Hide Skipper's work](#hide-skippers-work):
+- Category: `/en/products/category`
+
+Skipper's work URLs **with** [Hide Skipper's work](#hide-skippers-work):
+- Category: **No URL**
+```
+root (en)
+    services (services) <-- this is Skipper's work
+        products (products)
+            category (category) <-- this is Skipper's work
+                product1 (product1)
+                product2 (product2)
+                product3 (product3)
+```
+Product URLs will be for example `/en/products/product2`.
+Skipper's work URLs **without** [Hide Skipper's work](#hide-skippers-work):
+- Services: `/en/services`
+- Category: `/en/products/category`
+  
+Skipper's work URLs **with** [Hide Skipper's work](#hide-skippers-work):
+- Services: **No URL**
+- Category: **No URL**
+```
+root (en)
+    services (services) <-- this is Skipper's work
+        products (products) <-- this is Skipper's work
+            category (category)
+                product1 (product1)
+                product2 (product2)
+                product3 (product3)
+```
+Product URLs will be for example `/en/category/product3`.
+Skipper's work URLs **without** [Hide Skipper's work](#hide-skippers-work):
+- Services: `/en/services`
+- Category: `/en/products`
+  
+Skipper's work URLs **with** [Hide Skipper's work](#hide-skippers-work):
+- Services: **No URL**
+- Category: **No URL**
+
+
 ## Configuration
 Skipper's configuration uses for the most part the new .NET 5 IConfiguration, so we will modify for the most part the file appsettings.json.
 Configuration will work between environments, so if you want to change some options for development, you can do it.
