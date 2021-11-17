@@ -10,8 +10,8 @@ dotnet build
 dotnet run
 ```
 
-## Multiple skip support
-Our.Umbraco.Skipper can work no problem with multiple nodes to be skipped, both one following another or not.  
+## How it works?
+Our.Umbraco.Skipper can work with a single node or multiple nodes to be skipped from Umbraco's URL generation.  
 Some examples (between parentheses the URL segment):
 ```
 root (en)
@@ -124,7 +124,8 @@ To prevent infinite looping, I've added a check that after 50 (by default) itera
 ```
 
 ## Reserved property aliases
-Working the same way as specified in the [Special Property Type aliases for routing](https://our.umbraco.com/documentation/reference/routing/routing-properties), i've added some property aliases configuration to granularly control each node.
+Working the same way as specified in the [Special Property Type aliases for routing](https://our.umbraco.com/documentation/reference/routing/routing-properties), i've added some property aliases configuration to granularly control each node.  
+Keep in mind that `umbracoUrlName` and `umbracoUrlAlias` are compatible with Skipper, but with some drawbacks (see [here](#important)).
 ### umbracoUrlSkipper
 Creating a property alias with this name and using a True/False property editor lets you control for the node if it should be controller by Skipper or not.
 ### umbracoHideSkipperWork
@@ -160,5 +161,8 @@ articles
     skipperWork2
         article1 (1) 
 ```
-This ensures that there will be no duplicate URLs.
-Diffrently from [sotirisf](https://github.com/sotirisf)'s old v8, **Our.Umbraco.Skipper will check for ALL Skipper's work nodes**, so you don't have to worry even if the nodes are on different levels but reference to the same root node.
+This ensures that there will be no duplicate node names.
+Diffrently from [sotirisf](https://github.com/sotirisf)'s old v8, **Our.Umbraco.Skipper will check for ALL Skipper's work nodes**, so you don't have to worry even if the nodes are on different levels but reference to the same root node.  
+
+### Important ###
+The duplicate check will **NOT** directly check URLs, so if you use `umbracoUrlName` or `umbracoUrlAlias` you still have to check them yourself, even tho they work in the URL-generation.
