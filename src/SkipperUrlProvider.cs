@@ -41,9 +41,9 @@ namespace Our.Umbraco.Skipper
             }
 
             // If Skipper worked directly into this node
-            if (content.SkipperWasHere())
+            if (content.SkipperWasHere(culture))
             {
-                if (content.SkipperIs404OrContent())
+                if (content.SkipperIs404OrContent(culture))
                 {
                     // I can return an empty UrlInfo
                     // And since i cannot simply return new UrlInfo(string.Empty, false, culture);
@@ -53,7 +53,7 @@ namespace Our.Umbraco.Skipper
 
                 // As there might be a multi-level Skipper work, we need to check it here.
                 // If there are no other nodes in the path that Skipper worked into
-                if (!content.Parent.SkipperWasHere(recursive: true))
+                if (!content.Parent.SkipperWasHere(culture, recursive: true))
                 {                    
                     // I can return null as it should return normal URL.
                     return null;
@@ -64,12 +64,12 @@ namespace Our.Umbraco.Skipper
             bool skipperWasInAncestor = false;
             foreach (IPublishedContent item in content.AncestorsOrSelf())
             {
-                if (item.SkipperWasHere())
+                if (item.SkipperWasHere(culture))
                 {
                     skipperWasInAncestor = true;
                     break;
                 }
-            }            
+            }
             return skipperWasInAncestor ? BuildUrl(content, current, mode, culture) : null;
         }
 
@@ -118,10 +118,9 @@ namespace Our.Umbraco.Skipper
             foreach (string p in parts)
             {
                 IPublishedContent item = umbracoContext.Content.GetById(int.Parse(pathIds[index]));
-
                 // If the part we are looking is Skipper's work, and Id is NOT the content Id of the content we are building the Url for 
                 // (or configuration says we should return 404)
-                if (item.SkipperWasHere() && (item.Id != content.Id || item.SkipperIs404OrContent()))
+                if (item.SkipperWasHere(culture) && (item.Id != content.Id || item.SkipperIs404OrContent(culture)))
                 {
                     parts[index] = string.Empty;
                 }

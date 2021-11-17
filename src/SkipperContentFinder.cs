@@ -48,7 +48,7 @@ namespace Our.Umbraco.Skipper
                 return true;
             }
 
-            string culture = request.Culture;
+            string culture = request.Culture ?? null;
             var rootNodes = umbracoContext.Content.GetAtRoot(culture: culture);
             
             // We have to check both paths, with and without ending slash
@@ -61,7 +61,7 @@ namespace Our.Umbraco.Skipper
             {
                 // If skipper was here
                 // And the configuration says that skipper's work must return 404
-                if (item.SkipperWasHere() && item.SkipperIs404OrContent())
+                if (item.SkipperWasHere(culture) && item.SkipperIs404OrContent(culture))
                 {
                     request.SetIs404();
                     return true; // We have to return true in order to stop the contentfinder

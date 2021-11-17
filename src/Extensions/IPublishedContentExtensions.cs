@@ -6,7 +6,7 @@ namespace Our.Umbraco.Skipper.Extensions
 {
     public static class IPublishedContentExtensions
     {
-        public static bool SkipperWasHere(this IPublishedContent content)
+        public static bool SkipperWasHere(this IPublishedContent content, string culture = null)
         {
             if (SkipperConfiguration.Aliases != null)
             {
@@ -18,23 +18,32 @@ namespace Our.Umbraco.Skipper.Extensions
             }
 
             // This is the reserved property alias
-            if (content.Value<bool>(Constants.ReservedPropertyAlias, defaultValue: false))
-            {
-                return true;
-            }    
+            if (content.HasProperty(Constants.ReservedPropertyAlias))
+            {    
+                if (content.Value<bool>(Constants.ReservedPropertyAlias, culture, defaultValue: false))
+                {
+                    return true;
+                }
+
+                // Maybe we have invariant value?
+                if (content.Value<bool>(Constants.ReservedPropertyAlias, defaultValue: false))
+                {
+                    return true;
+                }    
+            }
             
             return false;   
         }
 
-        public static bool SkipperWasHere(this IPublishedContent content, bool recursive = false)
+        public static bool SkipperWasHere(this IPublishedContent content, string culture = null, bool recursive = false)
         {
-            return content.SkipperWasHere(out _, recursive);
+            return content.SkipperWasHere(out _, culture, recursive);
         }
         
-        public static bool SkipperWasHere(this IPublishedContent content, out IPublishedContent _content, bool recursive = false)
+        public static bool SkipperWasHere(this IPublishedContent content, out IPublishedContent _content, string culture = null, bool recursive = false)
         {
             // We can return the immediate result, as there is no need for recursion.
-            if (content.SkipperWasHere())
+            if (content.SkipperWasHere(culture))
             {
                 _content = content;
                 return true;
@@ -46,7 +55,7 @@ namespace Our.Umbraco.Skipper.Extensions
             while (content.Parent != null && content.Parent.Id != 0)
             {
                 content = content.Parent;
-                if (content.SkipperWasHere())
+                if (content.SkipperWasHere(culture))
                 {
                     _content = content;
                     return true;
@@ -57,19 +66,28 @@ namespace Our.Umbraco.Skipper.Extensions
             }
 
             _content = content;
-            return content.SkipperWasHere();
+            return content.SkipperWasHere(culture);
         }
 
-        public static bool SkipperIs404OrContent(this IPublishedContent content)
+        public static bool SkipperIs404OrContent(this IPublishedContent content, string culture = null)
         {
             if (SkipperConfiguration.SkipperWorkReturns404)
             {
                 return SkipperConfiguration.SkipperWorkReturns404;
             }
 
-            if (content.Value<bool>(Constants.ReservedSkipPropertyAlias, defaultValue: false))
+            if (content.HasProperty(Constants.ReservedSkipPropertyAlias))
             {
-                return true;
+                if (content.Value<bool>(Constants.ReservedSkipPropertyAlias, culture, defaultValue: false))
+                {
+                    return true;
+                }
+
+                // Maybe we have invariant value?
+                if (content.Value<bool>(Constants.ReservedSkipPropertyAlias, defaultValue: false))
+                {
+                    return true;
+                }
             }
 
             return false;
