@@ -61,7 +61,7 @@ namespace Our.Umbraco.Skipper
             {
                 // If skipper was here
                 // And the configuration says that skipper's work must return 404
-                if (item.SkipperWasHere() && SkipperConfiguration.SkipperWorkReturns404)
+                if (item.SkipperWasHere() && item.SkipperIs404OrContent())
                 {
                     request.SetIs404();
                     return true; // We have to return true in order to stop the contentfinder

@@ -19,7 +19,7 @@ namespace Our.Umbraco.Skipper
             // Only apply this UrlSegmentProvider if the setting SkipperWorkReturns404 is set to true
             // So this way we can set even in the index (i guess?) a value that's not the url it's supposed to build.
             if ((SkipperConfiguration.Aliases.Contains(content.ContentType.Alias.ToLower()) || content.GetValue<bool>(Constants.ReservedPropertyAlias)) 
-                && SkipperConfiguration.SkipperWorkReturns404)
+                && (SkipperConfiguration.SkipperWorkReturns404 || content.GetValue<bool>(Constants.ReservedSkipPropertyAlias)))
             {
                 return Constants.DefaultValues.HiddenSegment;                
             }

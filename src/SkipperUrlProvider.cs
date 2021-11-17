@@ -43,7 +43,7 @@ namespace Our.Umbraco.Skipper
             // If Skipper worked directly into this node
             if (content.SkipperWasHere())
             {
-                if (SkipperConfiguration.SkipperWorkReturns404)
+                if (content.SkipperIs404OrContent())
                 {
                     // I can return an empty UrlInfo
                     // And since i cannot simply return new UrlInfo(string.Empty, false, culture);
@@ -121,7 +121,7 @@ namespace Our.Umbraco.Skipper
 
                 // If the part we are looking is Skipper's work, and Id is NOT the content Id of the content we are building the Url for 
                 // (or configuration says we should return 404)
-                if (item.SkipperWasHere() && (item.Id != content.Id || SkipperConfiguration.SkipperWorkReturns404))
+                if (item.SkipperWasHere() && (item.Id != content.Id || item.SkipperIs404OrContent()))
                 {
                     parts[index] = string.Empty;
                 }

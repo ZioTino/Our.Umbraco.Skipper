@@ -6,6 +6,8 @@ namespace Our.Umbraco.Skipper.Configuration
 
         public const string ReservedPropertyAlias = "umbracoUrlSkipper";
 
+        public const string ReservedSkipPropertyAlias = "umbracoHideSkipperWork";
+
         public class Configuration
         {
 

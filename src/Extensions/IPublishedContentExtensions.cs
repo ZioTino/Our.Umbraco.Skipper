@@ -59,5 +59,20 @@ namespace Our.Umbraco.Skipper.Extensions
             _content = content;
             return content.SkipperWasHere();
         }
+
+        public static bool SkipperIs404OrContent(this IPublishedContent content)
+        {
+            if (SkipperConfiguration.SkipperWorkReturns404)
+            {
+                return SkipperConfiguration.SkipperWorkReturns404;
+            }
+
+            if (content.Value<bool>(Constants.ReservedSkipPropertyAlias, defaultValue: false))
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }
