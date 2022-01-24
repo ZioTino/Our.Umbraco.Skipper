@@ -63,26 +63,32 @@ namespace Our.Umbraco.Skipper.Notifications
                     try
                     {
                         baseNode = FindRootNode(umbracoContext, node, null);
+
+                        if (baseNode == null) continue;
                     }
                     catch { continue; }
 
                     int duplicateNodes = 0;
                     int maxNumber = 0;
 
-                    foreach (IPublishedContent sibling in baseNode.SiblingsAndSelf())
+                    IEnumerable<IPublishedContent> siblingsAndSelf = baseNode.SiblingsAndSelf();
+                    if (siblingsAndSelf.Any())
                     {
-                        // If for some reasons the baseNode is still Skipper's work we need to check for duplicates anyway
-                        if (baseNode.SkipperWasHere(culture: null))
+                        foreach (IPublishedContent sibling in siblingsAndSelf)
                         {
-                            CheckPublishedContentName(node, sibling, duplicateNodes, maxNumber, out duplicateNodes, out maxNumber, null);
-                        }
-
-                        // We need to check if some of it's children's name is the same as some of it's siblings
-                        foreach (IPublishedContent children in sibling.Children())
-                        {
-                            if (children.SkipperWasHere(culture: null))
+                            // If for some reasons the baseNode is still Skipper's work we need to check for duplicates anyway
+                            if (baseNode.SkipperWasHere(culture: null))
                             {
-                                CheckPublishedContentName(node, children, duplicateNodes, maxNumber, out duplicateNodes, out maxNumber, null);
+                                CheckPublishedContentName(node, sibling, duplicateNodes, maxNumber, out duplicateNodes, out maxNumber, null);
+                            }
+
+                            // We need to check if some of it's children's name is the same as some of it's siblings
+                            foreach (IPublishedContent children in sibling.Children())
+                            {
+                                if (children.SkipperWasHere(culture: null))
+                                {
+                                    CheckPublishedContentName(node, children, duplicateNodes, maxNumber, out duplicateNodes, out maxNumber, null);
+                                }
                             }
                         }
                     }
@@ -111,26 +117,32 @@ namespace Our.Umbraco.Skipper.Notifications
                         try
                         {
                             baseNode = FindRootNode(umbracoContext, node, culture);
+
+                            if (baseNode == null) continue;
                         }
                         catch { continue; }
 
                         int duplicateNodes = 0;
                         int maxNumber = 0;
 
-                        foreach (IPublishedContent sibling in baseNode.SiblingsAndSelf(culture))
+                        IEnumerable<IPublishedContent> siblingsAndSelf = baseNode.SiblingsAndSelf(culture);
+                        if (siblingsAndSelf.Any())
                         {
-                            // If for some reasons the baseNode is still Skipper's work we need to check for duplicates anyway
-                            if (baseNode.SkipperWasHere(culture))
+                            foreach (IPublishedContent sibling in siblingsAndSelf)
                             {
-                                CheckPublishedContentName(node, sibling, duplicateNodes, maxNumber, out duplicateNodes, out maxNumber, cultureInfos);
-                            }
-
-                            // We need to check if some of it's children's name is the same as some of it's siblings
-                            foreach (IPublishedContent children in sibling.Children(culture))
-                            {
-                                if (children.SkipperWasHere(culture))
+                                // If for some reasons the baseNode is still Skipper's work we need to check for duplicates anyway
+                                if (baseNode.SkipperWasHere(culture))
                                 {
-                                    CheckPublishedContentName(node, children, duplicateNodes, maxNumber, out duplicateNodes, out maxNumber, cultureInfos);
+                                    CheckPublishedContentName(node, sibling, duplicateNodes, maxNumber, out duplicateNodes, out maxNumber, cultureInfos);
+                                }
+
+                                // We need to check if some of it's children's name is the same as some of it's siblings
+                                foreach (IPublishedContent children in sibling.Children(culture))
+                                {
+                                    if (children.SkipperWasHere(culture))
+                                    {
+                                        CheckPublishedContentName(node, children, duplicateNodes, maxNumber, out duplicateNodes, out maxNumber, cultureInfos);
+                                    }
                                 }
                             }
                         }
