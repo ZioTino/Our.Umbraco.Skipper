@@ -19,17 +19,21 @@ namespace Our.Umbraco.Skipper
 
         private readonly IUmbracoContextAccessor _umbracoContextAccessor;
 
+        private readonly ISkipperConfiguration _skipperConfiguration;
+
         public SkipperUrlProvider(
             IOptions<RequestHandlerSettings> requestSettings, 
             ILogger<DefaultUrlProvider> logger, 
             ISiteDomainMapper siteDomainMapper, 
             IUmbracoContextAccessor umbracoContextAccessor, 
             UriUtility uriUtility,
-            IConfiguration configuration) 
+            IConfiguration configuration,
+            ISkipperConfiguration skipperConfiguration) 
             : base(requestSettings, logger, siteDomainMapper, umbracoContextAccessor, uriUtility)
         {
-            _configuration = configuration;
             _umbracoContextAccessor = umbracoContextAccessor;
+            _configuration = configuration;
+            _skipperConfiguration = skipperConfiguration;
         }
 
         public override UrlInfo GetUrl(IPublishedContent content, UrlMode mode, string culture, Uri current)
@@ -41,9 +45,9 @@ namespace Our.Umbraco.Skipper
             }
 
             // If Skipper worked directly into this node
-            if (content.SkipperWasHere(culture))
+            if (content.SkipperWasHere(_skipperConfiguration, culture))
             {
-                if (content.SkipperIs404OrContent(culture))
+                if (content.SkipperIs404OrContent(_skipperConfiguration, culture))
                 {
                     // I can return an empty UrlInfo
                     // And since i cannot simply return new UrlInfo(string.Empty, false, culture);
@@ -53,7 +57,7 @@ namespace Our.Umbraco.Skipper
 
                 // As there might be a multi-level Skipper work, we need to check it here.
                 // If there are no other nodes in the path that Skipper worked into
-                if (!content.Parent.SkipperWasHere(culture, recursive: true))
+                if (!content.Parent.SkipperWasHere(_skipperConfiguration, culture, recursive: true))
                 {                    
                     // I can return null as it should return normal URL.
                     return null;
@@ -64,7 +68,7 @@ namespace Our.Umbraco.Skipper
             bool skipperWasInAncestor = false;
             foreach (IPublishedContent item in content.AncestorsOrSelf())
             {
-                if (item.SkipperWasHere(culture))
+                if (item.SkipperWasHere(_skipperConfiguration, culture))
                 {
                     skipperWasInAncestor = true;
                     break;
@@ -120,7 +124,7 @@ namespace Our.Umbraco.Skipper
                 IPublishedContent item = umbracoContext.Content.GetById(int.Parse(pathIds[index]));
                 // If the part we are looking is Skipper's work, and Id is NOT the content Id of the content we are building the Url for 
                 // (or configuration says we should return 404)
-                if (item.SkipperWasHere(culture) && (item.Id != content.Id || item.SkipperIs404OrContent(culture)))
+                if (item.SkipperWasHere(_skipperConfiguration, culture) && (item.Id != content.Id || item.SkipperIs404OrContent(_skipperConfiguration, culture)))
                 {
                     parts[index] = string.Empty;
                 }

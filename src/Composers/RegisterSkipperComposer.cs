@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+using Our.Umbraco.Skipper.Configuration;
 using Our.Umbraco.Skipper.Notifications;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
@@ -11,6 +13,9 @@ namespace Our.Umbraco.Skipper.Composers
     {
         public void Compose(IUmbracoBuilder builder)
         {
+            // Register Skipper's configuration as singleton
+            builder.Services.AddSingleton<ISkipperConfiguration, SkipperConfiguration>();
+
             // Insert SkipperUrlSegmentProvider before the default one
             builder.UrlSegmentProviders().InsertBefore<DefaultUrlSegmentProvider, SkipperUrlSegmentProvider>();
 

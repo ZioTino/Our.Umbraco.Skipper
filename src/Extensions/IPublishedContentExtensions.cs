@@ -6,12 +6,12 @@ namespace Our.Umbraco.Skipper.Extensions
 {
     public static class IPublishedContentExtensions
     {
-        public static bool SkipperWasHere(this IPublishedContent content, string culture = null)
+        public static bool SkipperWasHere(this IPublishedContent content, ISkipperConfiguration _skipperConfiguration, string culture = null)
         {
-            if (SkipperConfiguration.Aliases != null)
+            if (_skipperConfiguration.Aliases != null)
             {
                 // Check is made always to lower
-                if (SkipperConfiguration.Aliases.Contains(content.ContentType.Alias.ToLower()))
+                if (_skipperConfiguration.Aliases.Contains(content.ContentType.Alias.ToLower()))
                 {
                     return true;
                 }
@@ -35,15 +35,15 @@ namespace Our.Umbraco.Skipper.Extensions
             return false;   
         }
 
-        public static bool SkipperWasHere(this IPublishedContent content, string culture = null, bool recursive = false)
+        public static bool SkipperWasHere(this IPublishedContent content, ISkipperConfiguration _skipperConfiguration, string culture = null, bool recursive = false)
         {
-            return content.SkipperWasHere(out _, culture, recursive);
+            return content.SkipperWasHere(out _, _skipperConfiguration, culture, recursive);
         }
         
-        public static bool SkipperWasHere(this IPublishedContent content, out IPublishedContent _content, string culture = null, bool recursive = false)
+        public static bool SkipperWasHere(this IPublishedContent content, out IPublishedContent _content, ISkipperConfiguration _skipperConfiguration, string culture = null, bool recursive = false)
         {
             // We can return the immediate result, as there is no need for recursion.
-            if (content.SkipperWasHere(culture))
+            if (content.SkipperWasHere(_skipperConfiguration, culture))
             {
                 _content = content;
                 return true;
@@ -55,25 +55,25 @@ namespace Our.Umbraco.Skipper.Extensions
             while (content.Parent != null && content.Parent.Id != 0)
             {
                 content = content.Parent;
-                if (content.SkipperWasHere(culture))
+                if (content.SkipperWasHere(_skipperConfiguration, culture))
                 {
                     _content = content;
                     return true;
                 }
 
                 count++;
-                if (count >= SkipperConfiguration.WhileLoopMaxCount) { break; }
+                if (count >= _skipperConfiguration.WhileLoopMaxCount) { break; }
             }
 
             _content = content;
-            return content.SkipperWasHere(culture);
+            return content.SkipperWasHere(_skipperConfiguration, culture);
         }
 
-        public static bool SkipperIs404OrContent(this IPublishedContent content, string culture = null)
+        public static bool SkipperIs404OrContent(this IPublishedContent content, ISkipperConfiguration _skipperConfiguration, string culture = null)
         {
-            if (SkipperConfiguration.SkipperWorkReturns404)
+            if (_skipperConfiguration.SkipperWorkReturns404)
             {
-                return SkipperConfiguration.SkipperWorkReturns404;
+                return _skipperConfiguration.SkipperWorkReturns404;
             }
 
             if (content.HasProperty(Constants.ReservedSkipPropertyAlias))

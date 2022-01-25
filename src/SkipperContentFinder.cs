@@ -17,16 +17,16 @@ namespace Our.Umbraco.Skipper
 
         private readonly IUmbracoContextAccessor _umbracoContextAccessor;
 
-        private readonly IConfiguration _configuration;
+        private readonly ISkipperConfiguration _skipperConfiguration;
         
         public SkipperContentFinder(
             IAppPolicyCache runtimeCache,
             IUmbracoContextAccessor umbracoContextAccessor,
-            IConfiguration configuration)
+            ISkipperConfiguration skipperConfiguration)
         {
             _runtimeCache = runtimeCache;
             _umbracoContextAccessor = umbracoContextAccessor;
-            _configuration = configuration;
+            _skipperConfiguration = skipperConfiguration;
         }
         public bool TryFindContent(IPublishedRequestBuilder request)
         {
@@ -61,7 +61,7 @@ namespace Our.Umbraco.Skipper
             {
                 // If skipper was here
                 // And the configuration says that skipper's work must return 404
-                if (item.SkipperWasHere(culture) && item.SkipperIs404OrContent(culture))
+                if (item.SkipperWasHere(_skipperConfiguration, culture) && item.SkipperIs404OrContent(_skipperConfiguration, culture))
                 {
                     request.SetIs404();
                     return true; // We have to return true in order to stop the contentfinder

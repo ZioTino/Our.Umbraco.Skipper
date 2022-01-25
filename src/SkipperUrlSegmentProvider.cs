@@ -9,10 +9,14 @@ namespace Our.Umbraco.Skipper
     {
         private readonly IUrlSegmentProvider _urlSegmentProvider;
 
+        private readonly ISkipperConfiguration _skipperConfiguration;
+
         public SkipperUrlSegmentProvider(
-            IShortStringHelper shortStringHelper)
+            IShortStringHelper shortStringHelper,
+            ISkipperConfiguration skipperConfiguration)
         {
             _urlSegmentProvider = new DefaultUrlSegmentProvider(shortStringHelper);
+            _skipperConfiguration = skipperConfiguration;
         }
 
         public string GetUrlSegment(IContentBase content, string culture = null)
@@ -46,8 +50,8 @@ namespace Our.Umbraco.Skipper
                 }
             }
 
-            if ((SkipperConfiguration.Aliases.Contains(content.ContentType.Alias.ToLower()) || reservedPropertyAliasValue) 
-                && (SkipperConfiguration.SkipperWorkReturns404 || reservedSkipPropertyAliasValue))
+            if ((_skipperConfiguration.Aliases.Contains(content.ContentType.Alias.ToLower()) || reservedPropertyAliasValue) 
+                && (_skipperConfiguration.SkipperWorkReturns404 || reservedSkipPropertyAliasValue))
             {
                 return Constants.DefaultValues.HiddenSegment;                
             }
