@@ -7,7 +7,7 @@
         <Title>Umbraco.Skipper</Title>
         <Description>An Umbraco package that lets you specify nodes and document types that will be excluded from Umbraco's URL generation.</Description>
         <PackageTags>umbraco plugin package</PackageTags>
-        <Version>1.1.1</Version>
+        <Version>1.1.2</Version>
         <Authors>ZioTino</Authors>
         <RootNamespace>Our.Umbraco.Skipper</RootNamespace>
         <PackageLicenseFile>LICENSE.md</PackageLicenseFile>

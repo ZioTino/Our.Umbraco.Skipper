@@ -116,7 +116,22 @@ namespace Our.Umbraco.Skipper
                 result = url.Text;
             }
 
-            // Handling start/end slashes
+            // Handling start/end slashes and HiddenSegment slashes
+            // '///' happens when a node is being skipped and its content should return 404, so no URL must be given.
+            // To accomplish this, I must replace the middle '/' with another character, no matter wich one because it will be removed after anyway.
+            // TODO: Maybe find another way? This seems strange
+            if (result.Contains("///"))
+            {
+                // Some best practice to avoid infinite loops
+                int count = 0;
+                while (result.Contains("///"))
+                {
+                    result = result.ReplaceFirst("///", "/#/");
+
+                    count++;
+                    if (count >= _skipperConfiguration.WhileLoopMaxCount) { break; }
+                }
+            }
             if (result.EndsWith("/"))
             {
                 result = result.Substring(0, result.Length - 1);
