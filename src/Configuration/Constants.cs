@@ -28,7 +28,7 @@ namespace Our.Umbraco.Skipper.Configuration
 
             public static readonly string[] DefaultAliases = new string[] {};
 
-            public const string HiddenSegment = "#";
+            public const string HiddenSegment = "/";
 
             public const int WhileLoopMaxCount = 50;
         }

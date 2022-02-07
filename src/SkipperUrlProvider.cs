@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Umbraco.Cms.Core.Configuration.Models;
@@ -16,24 +15,27 @@ namespace Our.Umbraco.Skipper
 {
     public class SkipperUrlProvider : DefaultUrlProvider
     {
-        private readonly IConfiguration _configuration;
-
         private readonly IUmbracoContextAccessor _umbracoContextAccessor;
 
         private readonly ISkipperConfiguration _skipperConfiguration;
 
+        private readonly GlobalSettings _globalSettings;
+
+        private readonly RequestHandlerSettings _requestSettings;
+
         public SkipperUrlProvider(
             IOptions<RequestHandlerSettings> requestSettings, 
+            IOptions<GlobalSettings> globalSettings,
             ILogger<DefaultUrlProvider> logger, 
             ISiteDomainMapper siteDomainMapper, 
             IUmbracoContextAccessor umbracoContextAccessor, 
             UriUtility uriUtility,
-            IConfiguration configuration,
             ISkipperConfiguration skipperConfiguration) 
             : base(requestSettings, logger, siteDomainMapper, umbracoContextAccessor, uriUtility)
         {
+            _requestSettings = requestSettings.Value;
+            _globalSettings = globalSettings.Value;
             _umbracoContextAccessor = umbracoContextAccessor;
-            _configuration = configuration;
             _skipperConfiguration = skipperConfiguration;
         }
 
@@ -88,13 +90,12 @@ namespace Our.Umbraco.Skipper
 
         private UrlInfo BuildUrl(IPublishedContent content, Uri current, UrlMode mode, string culture)
         {
-            if (!_umbracoContextAccessor.TryGetUmbracoContext(out IUmbracoContext umbracoContext))
-            {
-                throw new ArgumentNullException("UmbracoContext");
-            }
+            IUmbracoContext umbracoContext = _umbracoContextAccessor.GetRequiredUmbracoContext();
 
-            bool hideTopLevelNode = _configuration.GetValue<bool>("Umbraco:CMS:Global:HideTopLevelNodeFromPath", false);
-            string[] pathIds = content.Path.Split(',').Skip(hideTopLevelNode ? 2 : 1).Reverse().ToArray();
+            string[] pathIds = content.Path.Split(',')
+                .Skip(_globalSettings.HideTopLevelNodeFromPath ? 2 : 1)
+                .Reverse()
+                .ToArray();
 
             // Starting from the base Url generated from DefaultUrlProvider
             UrlInfo url = base.GetUrl(content, mode, culture, current);
@@ -140,10 +141,8 @@ namespace Our.Umbraco.Skipper
                 index++;
             }
 
-            bool isTrailingSlashActive = _configuration.GetValue<bool>("Umbraco:CMS:RequestHandler:AddTrailingSlash", true);
             string finalUrl = string.Join("/", parts.Reverse().Where(x => !string.IsNullOrEmpty(x)).ToArray());
-
-            finalUrl = isTrailingSlashActive
+            finalUrl = _requestSettings.AddTrailingSlash
                 ? finalUrl.EnsureEndsWith("/").EnsureStartsWith("/")
                 : finalUrl.EnsureStartsWith("/");
 
