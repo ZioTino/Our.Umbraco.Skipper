@@ -224,8 +224,6 @@ namespace Our.Umbraco.Skipper.Notifications
                     nodeName = node.Name.ToLower().TrimEnd();
                 }
 
-                Console.WriteLine($"Checking if {nodeName} is equal to {childrenName}...");
-
                 // We found a duplicate!
                 if (nodeName.Equals(childrenName))
                 {

@@ -10,6 +10,7 @@ using Umbraco.Cms.Core.Web;
 using Umbraco.Extensions;
 using Our.Umbraco.Skipper.Configuration;
 using Our.Umbraco.Skipper.Extensions;
+using System.Globalization;
 
 namespace Our.Umbraco.Skipper
 {
@@ -38,6 +39,14 @@ namespace Our.Umbraco.Skipper
 
         public override UrlInfo GetUrl(IPublishedContent content, UrlMode mode, string culture, Uri current)
         {
+            // Culture sometimes can be lowercase, which leads to problems further into the process.
+            // I.E. PublishedCultureInfo inside IPublishedContent.Cultures has lowercase culture
+            // Checking anyway if it's empty, just in case
+            if (!string.IsNullOrEmpty(culture))
+            {
+                culture = new CultureInfo(culture).Name;
+            }
+
             // Just in case the content is null, we return to the DefaultUrlProvider
             if (content == null)
             {
