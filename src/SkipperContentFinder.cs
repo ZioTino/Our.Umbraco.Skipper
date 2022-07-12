@@ -8,6 +8,7 @@ using Umbraco.Cms.Core.Web;
 using Umbraco.Extensions;
 using Our.Umbraco.Skipper.Extensions;
 using Our.Umbraco.Skipper.Configuration;
+using System.Threading.Tasks;
 
 namespace Our.Umbraco.Skipper
 {
@@ -28,7 +29,7 @@ namespace Our.Umbraco.Skipper
             _umbracoContextAccessor = umbracoContextAccessor;
             _skipperConfiguration = skipperConfiguration;
         }
-        public bool TryFindContent(IPublishedRequestBuilder request)
+        public Task<bool> TryFindContent(IPublishedRequestBuilder request)
         {
             // Getting the IUmbracoContext
             IUmbracoContext umbracoContext = _umbracoContextAccessor.GetRequiredUmbracoContext();
@@ -45,7 +46,7 @@ namespace Our.Umbraco.Skipper
             {
                 int nodeId = cache[path];
                 request.SetPublishedContent(umbracoContext.Content.GetById(nodeId));
-                return true;
+                return Task.FromResult(true);
             }
 
             string culture = request.Culture ?? null;
@@ -64,7 +65,7 @@ namespace Our.Umbraco.Skipper
                 if (item.SkipperWasHere(_skipperConfiguration, culture) && item.SkipperIs404OrContent(_skipperConfiguration, culture))
                 {
                     request.SetIs404();
-                    return true; // We have to return true in order to stop the contentfinder
+                    return Task.FromResult(true); // We have to return true in order to stop the contentfinder
                 }
 
                 if (cache == null)
@@ -85,10 +86,10 @@ namespace Our.Umbraco.Skipper
                     false);
 
                 request.SetPublishedContent(item);
-                return true;
+                return Task.FromResult(true);
             }
 
-            return false;
+            return Task.FromResult(false);
         }
     }
 }

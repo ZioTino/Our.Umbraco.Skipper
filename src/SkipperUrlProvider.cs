@@ -10,6 +10,7 @@ using Umbraco.Extensions;
 using Our.Umbraco.Skipper.Configuration;
 using Our.Umbraco.Skipper.Extensions;
 using System.Globalization;
+using Umbraco.Cms.Core.Services;
 
 namespace Our.Umbraco.Skipper
 {
@@ -24,16 +25,18 @@ namespace Our.Umbraco.Skipper
         private readonly RequestHandlerSettings _requestSettings;
 
         public SkipperUrlProvider(
-            IOptions<RequestHandlerSettings> requestSettings, 
             IOptions<GlobalSettings> globalSettings,
+      ISkipperConfiguration skipperConfiguration,
+
+      IOptionsMonitor<RequestHandlerSettings> requestSettings, 
             ILogger<DefaultUrlProvider> logger, 
             ISiteDomainMapper siteDomainMapper, 
             IUmbracoContextAccessor umbracoContextAccessor, 
             UriUtility uriUtility,
-            ISkipperConfiguration skipperConfiguration) 
-            : base(requestSettings, logger, siteDomainMapper, umbracoContextAccessor, uriUtility)
+      ILocalizationService localizationService)
+      : base(requestSettings, logger, siteDomainMapper, umbracoContextAccessor, uriUtility, localizationService)
         {
-            _requestSettings = requestSettings.Value;
+            _requestSettings = requestSettings.CurrentValue;
             _globalSettings = globalSettings.Value;
             _umbracoContextAccessor = umbracoContextAccessor;
             _skipperConfiguration = skipperConfiguration;
