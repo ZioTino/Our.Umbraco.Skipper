@@ -64,7 +64,7 @@ Skipper's work URLs **with** [Hide Skipper's work](#hide-skippers-work):
 
 
 ## Configuration
-Skipper's configuration uses for the most part the new .NET 5 IConfiguration, so we will modify for the most part the file appsettings.json.
+Skipper's configuration uses for the most part the new .NET 6 IConfiguration, so we will modify for the most part the file appsettings.json.
 Configuration will work between environments, so if you want to change some options for development, you can do it.
 
 ### Root configuration node
