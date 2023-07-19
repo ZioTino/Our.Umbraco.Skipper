@@ -201,7 +201,7 @@ namespace Our.Umbraco.Skipper.Notifications
             if (content.Id != node.Id)
             {
                 // We have to trim end the name as it may contain spaces
-                string childrenName = content.Name.ToLower().TrimEnd();
+                string childrenName = (cultureInfos!=null?content.Name(cultureInfos.Culture):content.Name).ToLower().TrimEnd();
                 string nodeName;
 
                 string culture = null;
