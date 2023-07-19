@@ -102,8 +102,11 @@ namespace Our.Umbraco.Skipper
 
             // Starting from the base Url generated from DefaultUrlProvider
             UrlInfo url = base.GetUrl(content, mode, culture, current);
-            if (url is null)
-                throw new ArgumentNullException($"Base GetUrl for Id {content.Id}.");
+            if (url is null){
+                //throw new ArgumentNullException($"Base GetUrl for Id {content.Id}.");
+                // if i cannot get defult url i cannot generate one
+                return null;
+            }
 
             // Parsing the host
             string result = string.Empty;
