@@ -1,0 +1,7 @@
+{
+     "$schema": "https://marketplace.umbraco.com/umbraco-marketplace-schema.json",
+     "IssueTrackerUrl": "https://ziotino.github.io/Our.Umbraco.ValidationAttributes/issues",
+     "ProjectUrl": "https://github.com/ZioTino/Our.Umbraco.Skipper",
+     "LicenseTypes": [ "Free" ],
+     "Category": "Developer Tools"
+}

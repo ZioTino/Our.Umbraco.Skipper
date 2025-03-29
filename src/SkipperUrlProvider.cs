@@ -28,10 +28,10 @@ namespace Our.Umbraco.Skipper
             IOptions<GlobalSettings> globalSettings,
       ISkipperConfiguration skipperConfiguration,
 
-      IOptionsMonitor<RequestHandlerSettings> requestSettings, 
-            ILogger<DefaultUrlProvider> logger, 
-            ISiteDomainMapper siteDomainMapper, 
-            IUmbracoContextAccessor umbracoContextAccessor, 
+      IOptionsMonitor<RequestHandlerSettings> requestSettings,
+            ILogger<DefaultUrlProvider> logger,
+            ISiteDomainMapper siteDomainMapper,
+            IUmbracoContextAccessor umbracoContextAccessor,
             UriUtility uriUtility,
       ILocalizationService localizationService)
       : base(requestSettings, logger, siteDomainMapper, umbracoContextAccessor, uriUtility, localizationService)
@@ -66,13 +66,13 @@ namespace Our.Umbraco.Skipper
                     // I can return an empty UrlInfo
                     // And since i cannot simply return new UrlInfo(string.Empty, false, culture);
                     // I have to use a placeholder
-                    return new UrlInfo(Constants.DefaultValues.HiddenSegment, false, culture);   
+                    return new UrlInfo(Constants.DefaultValues.HiddenSegment, false, culture);
                 }
 
                 // As there might be a multi-level Skipper work, we need to check it here.
                 // If there are no other nodes in the path that Skipper worked into
                 if (!content.Parent.SkipperWasHere(_skipperConfiguration, culture, recursive: true))
-                {                    
+                {
                     // I can return null as it should return normal URL.
                     return null;
                 }
@@ -102,7 +102,8 @@ namespace Our.Umbraco.Skipper
 
             // Starting from the base Url generated from DefaultUrlProvider
             UrlInfo url = base.GetUrl(content, mode, culture, current);
-            if (url is null){
+            if (url is null)
+            {
                 //throw new ArgumentNullException($"Base GetUrl for Id {content.Id}.");
                 // if i cannot get defult url i cannot generate one
                 return null;
@@ -149,13 +150,17 @@ namespace Our.Umbraco.Skipper
 
             string[] parts = result.Split('/').Reverse().ToArray();
 
-            if (pathIds.Length < parts.Length) //If these don't match, it's because the last portion is part of the hostname, most likely
+            // If these don't match, it's because the last portion is part of the hostname, most likely
+            if (pathIds.Length < parts.Length)
             {
-	            var hostparts = parts.Skip(parts.Length - 1).ToArray();
-				parts= parts.Take(parts.Length - 1).ToArray();
-                
-                host = host +"/"+ string.Join("/", hostparts.Reverse().Where(x => !string.IsNullOrEmpty(x)).ToArray());
-			}
+                // We remove the remaining part of the hostname from the parts.
+                // We suppose the remaining part is only one (eg. no support for /en/my-part)
+                var hostparts = parts.Skip(parts.Length - 1).ToArray();
+                parts = parts.Take(parts.Length - 1).ToArray();
+
+                // Remaining part is added to the original host part
+                host = host + "/" + string.Join("/", hostparts.Reverse().Where(x => !string.IsNullOrEmpty(x)).ToArray());
+            }
 
             int index = 0;
             foreach (string p in parts)
