@@ -149,6 +149,14 @@ namespace Our.Umbraco.Skipper
 
             string[] parts = result.Split('/').Reverse().ToArray();
 
+            if (pathIds.Length < parts.Length) //If these don't match, it's because the last portion is part of the hostname, most likely
+            {
+	            var hostparts = parts.Skip(parts.Length - 1).ToArray();
+				parts= parts.Take(parts.Length - 1).ToArray();
+                
+                host = host +"/"+ string.Join("/", hostparts.Reverse().Where(x => !string.IsNullOrEmpty(x)).ToArray());
+			}
+
             int index = 0;
             foreach (string p in parts)
             {
