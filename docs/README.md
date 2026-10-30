@@ -1,7 +1,18 @@
 # Our.Umbraco.Skipper
 An Umbraco package that lets you specify nodes and document types that will be excluded from Umbraco's URL generation.
 
-This project is exclusively for Umbraco 9+. This project is a port for v9, taken from the [original Umbraco-VirtualNodes](https://github.com/sotirisf/Umbraco-VirtualNodes) by [sotirisf](https://github.com/sotirisf).
+This package is a port for v9, taken from the [original Umbraco-VirtualNodes](https://github.com/sotirisf/Umbraco-VirtualNodes) by [sotirisf](https://github.com/sotirisf).
+
+## Supported versions
+
+| Package | Umbraco | .NET |
+|---|---|---|
+| 1.1.2 | 9 | net5.0 |
+| 1.1.5 | 10–13 | net6.0 |
+| 17.x | 17 | net10.0 |
+| 18.x | 18 | net10.0 |
+
+Umbraco 14–16 are not supported: the `DefaultUrlProvider` API changed and the 1.x code was never ported to those releases. Use Umbraco 13 (LTS) with 1.1.5, or Umbraco 17/18 with the matching package.
 
 ## Installation
 ```
