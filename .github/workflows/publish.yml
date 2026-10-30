@@ -1,0 +1,77 @@
+name: Publish to NuGet
+
+on:
+  push:
+    tags:
+      - 'v17.*'
+      - 'v18.*'
+      - 'v19.*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Verify tag matches package version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's:.*<VersionPrefix>\(.*\)</VersionPrefix>.*:\1:p' src/Our.Umbraco.Skipper.csproj | head -n1)"
+          tag="${GITHUB_REF_NAME#v}"
+          echo "Package version: ${version:-<not set>}; tag: ${tag}"
+          if [ -z "$version" ] || [ "$version" != "$tag" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match <VersionPrefix>${version}</VersionPrefix>."
+            exit 1
+          fi
+
+      - name: Build
+        run: dotnet build src/Our.Umbraco.Skipper.csproj -c Release --nologo
+
+      - name: Pack
+        run: dotnet pack src/Our.Umbraco.Skipper.csproj -c Release -o artifacts --no-build --nologo
+
+      - name: NuGet login (trusted publishing)
+        if: env.NUGET_API_KEY == ''
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push to nuget.org
+        shell: bash
+        run: |
+          set -euo pipefail
+          package="$(find artifacts -maxdepth 1 -name '*.nupkg' ! -name '*.symbols.nupkg' | head -n1)"
+          if [ -z "$package" ]; then
+            echo "::error::No package found in artifacts/."
+            exit 1
+          fi
+
+          if [ -n "${NUGET_API_KEY:-}" ]; then
+            dotnet nuget push "$package" \
+              --api-key "$NUGET_API_KEY" \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
+          else
+            dotnet nuget push "$package" \
+              --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
+          fi
